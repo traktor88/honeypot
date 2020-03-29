@@ -2,8 +2,6 @@ from functools import wraps
 from django.conf import settings
 from django.http import HttpResponseBadRequest
 from django.template.loader import render_to_string
-from django.utils import six
-from django.utils.decorators import available_attrs
 
 
 def honeypot_equals(val):
@@ -41,7 +39,7 @@ def check_honeypot(func=None, field_name=None):
         not specified.
     """
     # hack to reverse arguments if called with str param
-    if isinstance(func, six.string_types):
+    if isinstance(func, str):
         func, field_name = field_name, func
 
     def decorated(func):
@@ -51,7 +49,7 @@ def check_honeypot(func=None, field_name=None):
                 return response
             else:
                 return func(request, *args, **kwargs)
-        return wraps(func, assigned=available_attrs(func))(inner)
+        return wraps(func)(inner)
 
     if func is None:
         def decorator(func):
@@ -68,4 +66,4 @@ def honeypot_exempt(view_func):
     def wrapped(*args, **kwargs):
         return view_func(*args, **kwargs)
     wrapped.honeypot_exempt = True
-    return wraps(view_func, assigned=available_attrs(view_func))(wrapped)
+    return wraps(view_func)(wrapped)
